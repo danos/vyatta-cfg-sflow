@@ -1,0 +1,2 @@
+vyatta-service-sflow-v1-yang: changelog-file-missing-in-native-package
+vyatta-service-sflow-v1-yang: unusual-interpreter opt/vyatta/share/tmplscripts/*

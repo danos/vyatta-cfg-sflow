@@ -1,0 +1,2 @@
+help: Show dataplane sflow information
+run: vplane-show-sflow.py --show

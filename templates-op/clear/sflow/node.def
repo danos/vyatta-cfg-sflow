@@ -1,0 +1,2 @@
+help: Clear sFlow statistics and status
+run: vplane-show-sflow.py --clear

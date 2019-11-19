@@ -1,0 +1,143 @@
+module vyatta-service-sflow-v1 {
+	namespace "urn:vyatta.com:mgmt:vyatta-service-sflow:1";
+	prefix vyatta-service-sflow-v1;
+
+	import vyatta-types-v1 {
+		prefix types;
+	}
+	import vyatta-services-v1 {
+		prefix service;
+	}
+	import configd-v1 {
+		prefix configd;
+	}
+	import vyatta-interfaces-v1 {
+		prefix if;
+	}
+	import vyatta-interfaces-dataplane-v1 {
+		prefix if-dataplane;
+	}
+
+	organization "AT&T Inc.";
+	contact
+		"AT&T
+		 Postal: 208 S. Akard Street
+		 Dallas, TX 75202
+		 Web: www.att.com";
+
+	description
+		"Copyright (c) 2015-2016 by Brocade Communications Systems, Inc.
+		 All rights reserved.
+
+		 Copyright (c) 2019 AT&T Intellectual Property
+		 All rights reserved.
+
+		 Redistribution and use in source and binary forms, with or without
+		 modification, are permitted provided that the following conditions
+		 are met:
+
+		 1. Redistributions of source code must retain the above copyright
+		    notice, this list of conditions and the following disclaimer.
+		 2. Redistributions in binary form must reproduce the above
+		    copyright notice, this list of conditions and the following
+		    disclaimer in the documentation and/or other materials provided
+		    with the distribution.
+		 3. Neither the name of the copyright holder nor the names of its
+		    contributors may be used to endorse or promote products derived
+		    from this software without specific prior written permission.
+
+		 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+		 'AS IS' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+		 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+		 FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+		 COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+		 INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+		 BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+		 LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+		 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+		 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+		 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+		 POSSIBILITY OF SUCH DAMAGE.
+
+		 SPDX-License-Identifier: BSD-3-Clause
+
+		 The Vyatta configuration/operational YANG for
+		 vyatta-service-sflow-v1.";
+
+	revision 2016-04-15 {
+		description "Set sflow configd priority.";
+	}
+
+	revision 2015-08-14 {
+		description "Initial revision of version 1.";
+	}
+
+	augment /service:service {
+		container sflow {
+			presence "true";
+			configd:priority "901";
+			configd:help "sflow configuration for dataplane";
+			leaf polling-interval {
+				type uint32 {
+					range 0..65535 {
+						error-message "Sampling rate must be between o and 65535";
+					}
+				}
+				default "20";
+				configd:help "sFlow polling interval";
+				configd:delete "vyatta-sflow.pl --cmd=disable --proto=polling-interval --state=$VAR(@) --param=0";
+				configd:update "vyatta-sflow.pl --cmd=enable --proto=polling-interval --state=$VAR(@) --param=0";
+			}
+			leaf sampling-rate {
+				type uint32 {
+					range 512..65535 {
+						error-message "Sampling rate must be between 512 and 65535";
+					}
+				}
+				default "2048";
+				configd:help "sFlow sampling rate";
+				configd:delete "vyatta-sflow.pl --cmd=disable --proto=sampling-rate --state=$VAR(@) --param=0";
+				configd:update "vyatta-sflow.pl --cmd=enable --proto=sampling-rate --state=$VAR(@) --param=0";
+			}
+			leaf agent-address {
+				type union {
+					type types:ipv4-address;
+					type types:ipv6-address;
+				}
+				configd:priority "400";
+				configd:help "Agent address";
+				configd:delete "vyatta-sflow.pl --cmd=disable --proto=agent-address --state=$VAR(@) --param=0";
+				configd:update "vyatta-sflow.pl --cmd=enable --proto=agent-address --state=$VAR(@) --param=0";
+			}
+			list server-address {
+				configd:help "sFlow server address";
+				key "addr";
+				max-elements "4";
+				configd:delete "vyatta-sflow.pl --cmd=disable --proto=server --state=$VAR(@) --param=$VAR(server-port/@)";
+				configd:update "vyatta-sflow.pl --cmd=enable --proto=server --state=$VAR(@) --param=$VAR(server-port/@)";
+				leaf addr {
+					type union {
+						type types:ipv4-address;
+						type types:ipv6-address;
+					}
+				}
+				leaf server-port {
+					type uint16;
+					mandatory true;
+					configd:help "sFlow server UDP port";
+				}
+			}
+		}
+	}
+
+	augment /if:interfaces/if-dataplane:dataplane {
+		leaf sflow {
+			type empty;
+			configd:priority "911";
+			configd:help "Enable/Disable sflow for interface";
+			configd:delete "vplane-sflow.pl --cmd=disable --intf=$VAR(../@) --type=$VAR(..)";
+			configd:update "vplane-sflow.pl --cmd=enable --intf=$VAR(../@) --type=$VAR(..)";
+			configd:validate "/opt/vyatta/share/tmplscripts/interfaces/dataplane/sflow/configd_validate.cli";
+		}
+	}
+}
