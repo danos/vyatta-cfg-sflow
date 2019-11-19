@@ -1,3 +1,9 @@
+vyatta-cfg-sflow (3.0.3) unstable; urgency=medium
+
+  * DANOS Import Master
+
+ -- Nicholas Brown <nick.brown@att.com>  Mon, 18 Nov 2019 18:06:47 +0000
+
 vyatta-cfg-sflow (3.0.1.1) unstable; urgency=medium
 
   * DANOS Import

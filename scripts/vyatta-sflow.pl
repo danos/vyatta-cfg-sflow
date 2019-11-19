@@ -13,8 +13,12 @@ use Module::Load::Conditional qw[can_load];
 use Vyatta::Config;
 use Vyatta::VPlaned;
 
-my $vrf_available = can_load( modules => { "Vyatta::VrfManager" => undef },
-	autoload => "true" );
+use vyatta::proto::SFlowConfig;
+
+my $vrf_available = can_load(
+    modules  => { "Vyatta::VrfManager" => undef },
+    autoload => "true"
+);
 
 # Vyatta config
 my $config = new Vyatta::Config;
@@ -34,22 +38,50 @@ GetOptions(
 
 my $ctrl = new Vyatta::VPlaned;
 
-if ( $vrf_available && $proto eq "server" &&
-        $config->exists("service sflow server-address $state routing-instance")) {
-    $rd_id = Vyatta::VrfManager::get_vrf_id($config->returnValue(
-        "service sflow server-address $state routing-instance"));
+if (   $vrf_available
+    && $proto eq "server"
+    && $config->exists("service sflow server-address $state routing-instance") )
+{
+    $rd_id = Vyatta::VrfManager::get_vrf_id(
+        $config->returnValue(
+            "service sflow server-address $state routing-instance")
+    );
 }
 
+sub PackSubmsg {
+    my ($option) = @_;
+
+    if ( $option eq "server" ) {
+        my $serverconfig = { address => $state, port => $param };
+        $serverconfig->{vrf_id} = $rd_id if ( $rd_id ne "" );
+        return "server", Server->new($serverconfig);
+    } elsif ( $option eq "agent-address" ) {
+        return "agent", AgentAddress->new( { address => $state } );
+    } elsif ( $option eq "polling-interval" ) {
+        return "poll", PollInterval->new( { interval => $state } );
+    } elsif ( $option eq "sampling-rate" ) {
+        return "sample", SampleRate->new( { rate => $state } );
+    } else {
+        die("Incorrect command parameter: $option\n");
+    }
+}
+
+my $setting;
 if ( $cmd =~ /enable/ ) {
-    $ctrl->store(
-            "service sflow $proto $state $param $rd_id",
-            "sflow set $proto $state $param $rd_id"
+    $setting = SFlowConfig::Setting::SET;
+} elsif ( $cmd =~ /disable/ ) {
+    $setting = SFlowConfig::Setting::DELETE;
+} else {
+    die("Incorrect command name: $cmd\n");
+}
 
-    );
-}
-elsif ( $cmd =~ /disable/ ) {
-    $ctrl->store(
-            "service sflow $proto $state $param $rd_id",
-            "sflow del $proto $state $param $rd_id"
-    );
-}
+my ( $msgName, $msgContents ) = PackSubmsg($proto);
+
+my $sflowconfig = SFlowConfig->new(
+    {
+        command  => $setting,
+        $msgName => $msgContents
+    }
+);
+$ctrl->store_pb( "service sflow $proto $state $param $rd_id",
+    $sflowconfig, "vyatta:sflow" );
