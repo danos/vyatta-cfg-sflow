@@ -1,13 +1,13 @@
 Source: vyatta-cfg-sflow
 Section: contrib/net
-Priority: extra
+Priority: optional
 Maintainer: Vyatta Package Maintainers <DL-vyatta-help@att.com>
 Build-Depends:
  debhelper (>= 9),
  dh-yang,
  libgoogle-protocolbuffers-perl,
  vyatta-dataplane-flow-plugin-protobuf
-Standards-Version: 3.9.6
+Standards-Version: 4.1.4
 
 Package: vyatta-service-sflow-v1-yang
 Architecture: all
