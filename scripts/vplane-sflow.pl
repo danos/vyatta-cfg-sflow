@@ -12,7 +12,16 @@ use Getopt::Long;
 use Vyatta::Config;
 use Vyatta::VPlaned;
 
-use vyatta::proto::SFlowConfig;
+use Google::ProtocolBuffers;
+
+Google::ProtocolBuffers->parsefile(
+  '/usr/share/vyatta-dataplane/protobuf/SFlowConfig.proto',
+    {
+        include_dir          => '/usr/share/vyatta-dataplane/protobuf/',
+        follow_best_practice => 1,
+        create_accessors     => 1,
+    }
+);
 
 # Vyatta config
 my $config = new Vyatta::Config;
@@ -37,9 +46,9 @@ my $setting;
 my $ctrl = new Vyatta::VPlaned;
 
 if ( $cmd =~ /enable/ ) {
-    $setting = SFlowConfig::Setting::ENABLE;
+    $setting = SFlowConfig::Setting::ENABLE();
 } elsif ( $cmd =~ /disable/ ) {
-    $setting = SFlowConfig::Setting::DISABLE;
+    $setting = SFlowConfig::Setting::DISABLE();
 } else {
     die("Incorrect command name: $cmd\n");
 }
