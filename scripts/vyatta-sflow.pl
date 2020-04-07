@@ -13,16 +13,7 @@ use Module::Load::Conditional qw[can_load];
 use Vyatta::Config;
 use Vyatta::VPlaned;
 
-use Google::ProtocolBuffers;
-
-Google::ProtocolBuffers->parsefile(
-  '/usr/share/vyatta-dataplane/protobuf/SFlowConfig.proto',
-    {
-        include_dir          => '/usr/share/vyatta-dataplane/protobuf/',
-        follow_best_practice => 1,
-        create_accessors     => 1,
-    }
-);
+use vyatta::proto::SFlowConfig;
 
 my $vrf_available = can_load(
     modules  => { "Vyatta::VrfManager" => undef },
@@ -77,9 +68,9 @@ sub PackSubmsg {
 
 my $setting;
 if ( $cmd =~ /enable/ ) {
-    $setting = SFlowConfig::Setting::SET();
+    $setting = SFlowConfig::Setting::SET;
 } elsif ( $cmd =~ /disable/ ) {
-    $setting = SFlowConfig::Setting::DELETE();
+    $setting = SFlowConfig::Setting::DELETE;
 } else {
     die("Incorrect command name: $cmd\n");
 }

@@ -1,3 +1,4 @@
+SFlowConfig.pm /usr/share/perl5/vyatta/proto/
 scripts/vplane-sflow.pl opt/vyatta/sbin
 scripts/vplane-show-sflow.py opt/vyatta/bin
 scripts/vyatta-sflow.pl opt/vyatta/sbin

@@ -5,6 +5,8 @@ Maintainer: Vyatta Package Maintainers <DL-vyatta-help@att.com>
 Build-Depends:
  debhelper (>= 9),
  dh-yang,
+ libgoogle-protocolbuffers-perl,
+ vyatta-dataplane-flow-plugin-protobuf
 Standards-Version: 3.9.6
 
 Package: vyatta-service-sflow-v1-yang
@@ -18,7 +20,6 @@ Depends:
  python3-vplaned,
  vplane-config,
  vyatta-cfg (>= 0.104.32),
- vyatta-dataplane-flow-plugin-protobuf,
  vyatta-op (>= 0.13),
  ${misc:Depends},
  ${perl:Depends},
