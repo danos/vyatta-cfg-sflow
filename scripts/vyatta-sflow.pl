@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 # Copyright (C) 2012-2015 Vyatta, Inc.
-# Copyright (c) 2019, AT&T Intellectual Property.
+# Copyright (c) 2019-2021, AT&T Intellectual Property.
 # All Rights Reserved.
 
 # SPDX-License-Identifier: GPL-2.0-only
@@ -83,5 +83,11 @@ my $sflowconfig = SFlowConfig->new(
         $msgName => $msgContents
     }
 );
-$ctrl->store_pb( "service sflow $proto $state $param $rd_id",
-    $sflowconfig, "vyatta:sflow" );
+
+my $key;
+if ( $proto eq "server" ) {
+    $key = "service sflow $proto $state";
+} else {
+    $key = "service sflow $proto";
+}
+$ctrl->store_pb( $key, $sflowconfig, "vyatta:sflow" );
