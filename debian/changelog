@@ -1,3 +1,9 @@
+vyatta-cfg-sflow (3.0.5) unstable; urgency=medium
+
+  * Fix issues with cstore keys for sflow configuration
+
+ -- Gavin Shearer <gavin.shearer@att.com>  Tue, 12 Oct 2021 17:55:03 +0100
+
 vyatta-cfg-sflow (3.0.4) unstable; urgency=medium
 
   * Use dataplane flow plugin protobuf definition directly (Fixes: VRVDR-50591)
